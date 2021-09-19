@@ -152,3 +152,70 @@ bool kkBook::Cancel(const kkMessage & msg)
 		}
 	}
 }
+
+void kkBook::CreateSnapshot(unsigned long long int timestamp) const
+{
+	kkSnapshot snapshot(timestamp);
+
+	if (!bids.empty())
+	{
+		kkBookSideConstIterator it = bids.cbegin();
+		int level = 0;
+		int price = (*it)->price;
+		int shares = (*it)->shares;
+		snapshot.bidprice[0] = price;
+		snapshot.bidshares[0] = shares;
+		++it;
+		if (it != bids.cend())
+		{
+			while ((it != bids.cend()) && (level < 5))
+			{
+				if ((*it)->price < price)
+				{
+					level++;
+					price = (*it)->price;
+					shares = 0;
+				}
+				else
+				{
+					shares += (*it)->shares;
+					snapshot.bidprice[level] = price;
+					snapshot.bidshares[level] = shares;
+					++it;
+				}
+			}
+		}
+	}
+
+	if (!asks.empty())
+	{
+		kkBookSideConstIterator it = asks.cbegin();
+		int level = 0;
+		int price = (*it)->price;
+		int shares = (*it)->shares;
+		snapshot.askprice[0] = price;
+		snapshot.askshares[0] = shares;
+		++it;
+		if (it != asks.cend())
+		{
+			while ((it != asks.cend()) && (level < 5))
+			{
+				if ((*it)->price > price)
+				{
+					level++;
+					price = (*it)->price;
+					shares = 0;
+				}
+				else
+				{
+					shares += (*it)->shares;
+					snapshot.askprice[level] = price;
+					snapshot.askshares[level] = shares;
+					++it;
+				}
+			}
+		}
+	}
+
+	snapshots.insert(snapshot);
+}

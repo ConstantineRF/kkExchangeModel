@@ -136,6 +136,7 @@
     <ClInclude Include="kkMessageProcessor.h" />
     <ClInclude Include="kkOrder.h" />
     <ClInclude Include="kkMessageDriver.h" />
+    <ClInclude Include="kkSnapshot.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

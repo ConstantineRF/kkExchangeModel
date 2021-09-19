@@ -6,6 +6,7 @@
 #include "kkOrder.h"
 #include "kkMessageDriver.h"
 #include "kkAgent.h"
+#include "kkSnapshot.h"
 
 typedef std::set<kkOrder*, kkOrderPtrPriceTimeComparator> kkBookSide;
 typedef std::set<kkOrder*, kkOrderPtrPriceTimeComparator>::const_iterator kkBookSideConstIterator;
@@ -18,10 +19,11 @@ class kkBook
 	std::map<unsigned int, kkOrder*> id2order;
 	kkMessageDriver & messagedriver;
 	kkAgentsMap & agents;
+	kkSnapshotSeries & snapshots;
 	unsigned int nextorderid;
 
 public:
-	kkBook(kkMessageDriver & messagedriver, kkAgentsMap & agents) : messagedriver(messagedriver), agents(agents), nextorderid(1) {}
+	kkBook(kkMessageDriver & messagedriver, kkAgentsMap & agents, kkSnapshotSeries & snapshots) : messagedriver(messagedriver), agents(agents), snapshots(snapshots), nextorderid(1) {}
 	bool Add(unsigned long long int arrivetime, unsigned int agentid, short side, unsigned int shares, int price, bool IOC = false, unsigned int orderid = 0);
 	bool Add(const kkMessage& msg);
 	bool Modify(const kkMessage& msg);
@@ -45,5 +47,6 @@ public:
 		return os;
 	}
 
+	void CreateSnapshot(unsigned long long int timestamp) const;
 };
 

@@ -14,20 +14,20 @@ public:
 	{
 		// Process messages to exchange
 		kkMessagesQueue::iterator it = messagedriver.messagesqueues[0].begin();
-		bool res;
+		bool res = false;
 		while ((it != messagedriver.messagesqueues[0].end()) && (it->GetArriveTime() <= currenttime))
 		{
 			if (it->GetMsgType() == ADD)
 			{
-				res = book.Add(*it);
+				res |= book.Add(*it);
 			}
 			else if (it->GetMsgType() == MODIFY)
 			{
-				res = book.Modify(*it);
+				res |= book.Modify(*it);
 			}
 			else if (it->GetMsgType() == CANCEL)
 			{
-				res = book.Cancel(*it);
+				res |= book.Cancel(*it);
 			}
 			else
 			{
@@ -35,6 +35,8 @@ public:
 			}
 			it = messagedriver.messagesqueues[0].erase(it);
 		}
+		if (res) { book.CreateSnapshot(currenttime); }
+
 		// Process messages to agents
 	}
 };
