@@ -2,13 +2,30 @@
 #include <iostream>
 #include <map>
 #include <algorithm>
+#include <cassert>
 #include "kkSnapshot.h"
+
+class kkOrderRecord
+{
+	unsigned int id;
+	short side; // 1 buy, -1 sell
+	unsigned int shares;
+	int price;
+	bool operator<(const kkOrderRecord& rhs) const
+	{
+		// model price-time priority, assumes same side
+		assert(side == rhs.side);
+		return (side * (price - rhs.price) > 0) || ((price == rhs.price) && (id < rhs.id));
+	}
+
+};
+
 
 class kkAgent
 {
 	unsigned int id;
 	unsigned int latency;
-	kkSnapshotSeries* snapshotsptr; // sbuscribed to prices
+	kkSnapshotSeries* snapshotsptr; // subscribed to prices
 public:
 	kkAgent() {};
 	kkAgent(unsigned int id, unsigned int latency, kkSnapshotSeries* snapshotsptr) : id(id), latency(latency), snapshotsptr(snapshotsptr) { std::cout << "Created agent " << id << " with latency " << latency << std::endl; }

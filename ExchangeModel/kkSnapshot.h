@@ -54,5 +54,65 @@ public:
 	}
 };
 
-
+// should I possibly convert this to set of pointers? should I wrap this into a container? should I move snapshot read into a method of this container?
 typedef std::set<kkSnapshot> kkSnapshotSeries;
+
+struct kkSnapshotPtrTimeComparator // operator <
+{
+	bool operator()(const kkSnapshot* a, const kkSnapshot* b) const
+	{
+		assert(a->timestamp != b->timestamp);
+		return (a->timestamp < b->timestamp);
+	}
+	/*
+	bool operator()(const kkSnapshot* a, unsigned long long int b) const
+	{
+		assert(a->timestamp != b);
+		return (a->timestamp < b);
+	}
+	bool operator()(unsigned long long int a, const kkSnapshot* b) const
+	{
+		assert(a != b->timestamp);
+		return (a < b->timestamp);
+	}
+	*/
+};
+
+
+class kkSnapshotStream
+{
+	std::set<kkSnapshot*, kkSnapshotPtrTimeComparator> snapshotptrs;
+public:
+	kkSnapshotStream() {}
+	~kkSnapshotStream()
+	{
+		for (auto it = snapshotptrs.begin(); it != snapshotptrs.end(); ++it)
+		{
+			delete *it;
+		}
+		snapshotptrs.clear();
+	}
+	kkSnapshot* GetSnapshotByTimestamp(unsigned long long int timestamp) const
+	{
+		if (snapshotptrs.empty())
+		{
+			return nullptr;
+		}
+		else if ((*snapshotptrs.begin())->timestamp > timestamp)
+		{
+			return nullptr;
+		}
+		else
+		{
+			auto lb = std::lower_bound(snapshotptrs.begin(), snapshotptrs.end(), &kkSnapshot(timestamp));
+			if (lb != snapshotptrs.begin())
+			{
+				return *(--lb);
+			}
+			else {
+				return nullptr;
+			}
+		}
+
+	}
+};
